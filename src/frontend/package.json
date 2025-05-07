@@ -47,6 +47,7 @@
     "file-saver": "^2.0.5",
     "framer-motion": "^11.2.10",
     "fuse.js": "^7.0.0",
+    "keycloak-js": "^26.2.0",
     "lodash": "^4.17.21",
     "lucide-react": "^0.503.0",
     "million": "^3.1.11",
@@ -90,6 +91,7 @@
     "zustand": "^4.5.2"
   },
   "scripts": {
+    "dev": "vite",
     "dev:docker": "vite --host 0.0.0.0",
     "start": "vite",
     "build": "vite build",
