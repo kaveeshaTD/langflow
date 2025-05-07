@@ -35,6 +35,7 @@ import ShortcutsPage from "./pages/SettingsPage/pages/ShortcutsPage";
 import StoreApiKeyPage from "./pages/SettingsPage/pages/StoreApiKeyPage";
 import StorePage from "./pages/StorePage";
 import ViewPage from "./pages/ViewPage";
+import { KeycloakProvider } from "./keycloak/KeycloakProvider";
 
 const AdminPage = lazy(() => import("./pages/AdminPage"));
 const LoginAdminPage = lazy(() => import("./pages/AdminPage/LoginPage"));
@@ -58,9 +59,11 @@ const router = createBrowserRouter(
     <Route
       path={ENABLE_CUSTOM_PARAM ? "/:customParam?" : "/"}
       element={
-        <ContextWrapper key={2}>
-          <Outlet />
-        </ContextWrapper>
+        <KeycloakProvider>
+          <ContextWrapper key={2}>
+            <Outlet />
+          </ContextWrapper>
+        </KeycloakProvider>
       }
     >
       <Route path="" element={<AppInitPage />}>

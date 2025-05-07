@@ -22,10 +22,10 @@ const KeycloakContext = createContext<KeycloakContextProps>({
 
 interface KeycloakProviderProps {
   children: ReactNode;
-  roles: string[];
+  // roles: string[];
 }
 
-export function KeycloakProvider({ children, roles }: KeycloakProviderProps) {
+export function KeycloakProvider({ children}: KeycloakProviderProps) {
   const [authenticated, setAuthenticated] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [token, setToken] = useState<string | null>(null);
@@ -111,12 +111,12 @@ export function KeycloakProvider({ children, roles }: KeycloakProviderProps) {
   );
 
   // Role-based authentication
-  const hasRequiredRole = useMemo(() => {
-    if (roles.length > 0) {
-      return roles.some((role) => keycloak.hasResourceRole(role));
-    }
-    return true;
-  }, [roles, loading]);
+  // const hasRequiredRole = useMemo(() => {
+  //   if (roles.length > 0) {
+  //     return roles.some((role) => keycloak.hasResourceRole(role));
+  //   }
+  //   return true;
+  // }, [roles, loading]);
 
   //display loader until auth flow complete
   if (loading)
@@ -126,9 +126,9 @@ export function KeycloakProvider({ children, roles }: KeycloakProviderProps) {
       </div>
     );
 
-  if (!loading && (!authenticated || !hasRequiredRole)) {
-    keycloak.logout();
-  }
+  // if (!loading && (!authenticated || !hasRequiredRole)) {
+  //   keycloak.logout();
+  // }
 
   return (
     <KeycloakContext.Provider value={authenticationStatus}>
