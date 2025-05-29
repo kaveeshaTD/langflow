@@ -151,10 +151,12 @@ const HandleContent = memo(function HandleContent({
 
 const HandleRenderComponent = memo(function HandleRenderComponent({
   left,
+  nodes,
   tooltipTitle = "",
   proxy,
   id,
   title,
+  edges,
   myData,
   colors,
   setFilterEdge,
@@ -164,10 +166,12 @@ const HandleRenderComponent = memo(function HandleRenderComponent({
   colorName,
 }: {
   left: boolean;
+  nodes: any;
   tooltipTitle?: string;
   proxy?: any;
   id: any;
   title: string;
+  edges: any;
   myData: any;
   colors: string[];
   setFilterEdge: (edges: any) => void;
@@ -205,17 +209,20 @@ const HandleRenderComponent = memo(function HandleRenderComponent({
     [id, proxy],
   );
 
-  const getConnection = (semiConnection: {
-    source?: string;
-    sourceHandle?: string;
-    target?: string;
-    targetHandle?: string;
-  }) => ({
-    source: semiConnection.source ?? nodeId,
-    sourceHandle: semiConnection.sourceHandle ?? myId,
-    target: semiConnection.target ?? nodeId,
-    targetHandle: semiConnection.targetHandle ?? myId,
-  });
+  const getConnection = useCallback(
+    (semiConnection: {
+      source?: string;
+      sourceHandle?: string;
+      target?: string;
+      targetHandle?: string;
+    }) => ({
+      source: semiConnection.source ?? nodeId,
+      sourceHandle: semiConnection.sourceHandle ?? myId,
+      target: semiConnection.target ?? nodeId,
+      targetHandle: semiConnection.targetHandle ?? myId,
+    }),
+    [nodeId, myId],
+  );
 
   const {
     sameNode,
@@ -248,26 +255,25 @@ const HandleRenderComponent = memo(function HandleRenderComponent({
       handleDragging &&
       (left ? handleDragging.source : handleDragging.target) &&
       !ownDraggingHandle
-        ? isValidConnection(getConnection(handleDragging))
+        ? isValidConnection(getConnection(handleDragging), nodes, edges)
         : false;
 
     const filterOpenHandle =
       filterType &&
       (left ? filterType.source : filterType.target) &&
       !ownFilterHandle
-        ? isValidConnection(getConnection(filterType))
+        ? isValidConnection(getConnection(filterType), nodes, edges)
         : false;
 
     const openHandle = filterOpenHandle || draggingOpenHandle;
     const filterPresent = handleDragging || filterType;
 
-    const connectedEdge = useFlowStore
-      .getState()
-      .edges.find(
-        (edge) => edge.target === nodeId && edge.targetHandle === myId,
-      );
-    const outputType = connectedEdge?.data?.sourceHandle?.output_types?.[0];
-    const connectedColor = outputType ? nodeColorsName[outputType] : "gray";
+    const connectedEdge = edges.find(
+      (edge) => edge.target === nodeId && edge.targetHandle === myId,
+    );
+    const connectedColor =
+      nodeColorsName[connectedEdge?.data?.sourceHandle?.output_types[0]] ||
+      "gray";
 
     const isNullHandle =
       filterPresent && !(openHandle || ownDraggingHandle || ownFilterHandle);
@@ -335,6 +341,9 @@ const HandleRenderComponent = memo(function HandleRenderComponent({
     filterType,
     nodeId,
     myId,
+    nodes,
+    edges,
+    getConnection,
     dark,
     colors,
     colorName,
@@ -356,7 +365,6 @@ const HandleRenderComponent = memo(function HandleRenderComponent({
   );
 
   const handleClick = useCallback(() => {
-    const nodes = useFlowStore.getState().nodes;
     setFilterEdge(groupByFamily(myData, tooltipTitle!, left, nodes!));
     setFilterType(currentFilter);
     if (filterOpenHandle && filterType) {
@@ -368,12 +376,14 @@ const HandleRenderComponent = memo(function HandleRenderComponent({
     myData,
     tooltipTitle,
     left,
+    nodes,
     setFilterEdge,
     setFilterType,
     currentFilter,
     filterOpenHandle,
     filterType,
     onConnect,
+    getConnection,
   ]);
 
   const handleMouseEnter = useCallback(() => setIsHovered(true), []);
@@ -386,8 +396,8 @@ const HandleRenderComponent = memo(function HandleRenderComponent({
 
   // Memoize the validation function
   const validateConnection = useCallback(
-    (connection: any) => isValidConnection(connection),
-    [],
+    (connection: any) => isValidConnection(connection, nodes, edges),
+    [nodes, edges],
   );
 
   return (
@@ -414,7 +424,7 @@ const HandleRenderComponent = memo(function HandleRenderComponent({
           position={left ? Position.Left : Position.Right}
           id={myId}
           isValidConnection={(connection) =>
-            isValidConnection(connection as Connection)
+            isValidConnection(connection as Connection, nodes, edges)
           }
           className={cn(
             `group/handle z-50 transition-all`,

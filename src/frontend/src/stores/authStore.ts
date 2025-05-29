@@ -5,9 +5,14 @@ import { Cookies } from "react-cookie";
 import { create } from "zustand";
 
 const cookies = new Cookies();
+
+const accesstoken_test = cookies.get(LANGFLOW_ACCESS_TOKEN);
+console.log("sample test token is ", accesstoken_test);
+
 const useAuthStore = create<AuthStoreType>((set, get) => ({
   isAdmin: false,
   isAuthenticated: !!cookies.get(LANGFLOW_ACCESS_TOKEN),
+  //isAuthenticated: !!sessionStorage.getItem("access_token"),
   accessToken: cookies.get(LANGFLOW_ACCESS_TOKEN) ?? null,
   userData: null,
   autoLogin: null,

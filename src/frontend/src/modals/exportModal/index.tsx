@@ -1,6 +1,5 @@
 import { track } from "@/customization/utils/analytics";
 import useFlowStore from "@/stores/flowStore";
-import { FlowType } from "@/types/flow";
 import { ReactNode, forwardRef, useEffect, useState } from "react";
 import IconComponent from "../../components/common/genericIconComponent";
 import EditFlowSettings from "../../components/core/editFlowSettingsComponent";
@@ -17,21 +16,11 @@ import { downloadFlow, removeApiKeys } from "../../utils/reactflowUtils";
 import BaseModal from "../baseModal";
 
 const ExportModal = forwardRef(
-  (
-    props: {
-      children?: ReactNode;
-      open?: boolean;
-      setOpen?: (open: boolean) => void;
-      flowData?: FlowType;
-    },
-    ref,
-  ): JSX.Element => {
+  (props: { children: ReactNode }, ref): JSX.Element => {
     const version = useDarkStore((state) => state.version);
-    const setSuccessData = useAlertStore((state) => state.setSuccessData);
     const setNoticeData = useAlertStore((state) => state.setNoticeData);
     const [checked, setChecked] = useState(false);
-    const currentFlowOnPage = useFlowStore((state) => state.currentFlow);
-    const currentFlow = props.flowData ?? currentFlowOnPage;
+    const currentFlow = useFlowStore((state) => state.currentFlow);
     const isBuilding = useFlowStore((state) => state.isBuilding);
     useEffect(() => {
       setName(currentFlow?.name ?? "");
@@ -41,13 +30,7 @@ const ExportModal = forwardRef(
     const [description, setDescription] = useState(
       currentFlow?.description ?? "",
     );
-
-    const [customOpen, customSetOpen] = useState(false);
-    const [open, setOpen] =
-      props.open !== undefined && props.setOpen !== undefined
-        ? [props.open, props.setOpen]
-        : [customOpen, customSetOpen];
-
+    const [open, setOpen] = useState(false);
     return (
       <BaseModal
         size="smaller-h-full"
@@ -86,16 +69,12 @@ const ExportModal = forwardRef(
               }),
               name!,
               description,
-            ).then(() => {
-              setSuccessData({
-                title: "Flow exported successfully",
-              });
-            });
+            );
           setOpen(false);
           track("Flow Exported", { flowId: currentFlow!.id });
         }}
       >
-        <BaseModal.Trigger asChild>{props.children ?? <></>}</BaseModal.Trigger>
+        <BaseModal.Trigger asChild>{props.children}</BaseModal.Trigger>
         <BaseModal.Header description={EXPORT_DIALOG_SUBTITLE}>
           <span className="pr-2">Export</span>
           <IconComponent
@@ -128,13 +107,7 @@ const ExportModal = forwardRef(
           </span>
         </BaseModal.Content>
 
-        <BaseModal.Footer
-          submit={{
-            label: "Export",
-            loading: isBuilding,
-            dataTestId: "modal-export-button",
-          }}
-        />
+        <BaseModal.Footer submit={{ label: "Export", loading: isBuilding }} />
       </BaseModal>
     );
   },

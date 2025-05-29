@@ -1,7 +1,3 @@
-import {
-  customGetAppVersions,
-  customGetLatestVersion,
-} from "@/customization/utils/custom-get-app-latest-version";
 import { Edge, Node, ReactFlowJsonObject } from "@xyflow/react";
 import { AxiosRequestConfig, AxiosResponse } from "axios";
 import { BASE_URL_API } from "../../constants/constants";
@@ -36,10 +32,6 @@ export async function getDiscordCount() {
     return null;
   }
 }
-
-export const getAppVersions = customGetAppVersions;
-export const getLatestVersion = customGetLatestVersion;
-
 export async function createApiKey(name: string) {
   try {
     const res = await api.post(`${BASE_URL_API}api_key/`, { name });

@@ -13,8 +13,7 @@ import {
   type ReactFlowState,
 } from "@xyflow/react";
 import { cloneDeep } from "lodash";
-import { useCallback, useEffect } from "react";
-import { useShallow } from "zustand/react/shallow";
+import { useEffect } from "react";
 import { shallow } from "zustand/shallow";
 
 type CustomControlButtonProps = {
@@ -71,22 +70,20 @@ const CanvasControls = ({ children }) => {
     shallow,
   );
   const saveFlow = useSaveFlow();
-  const isLocked = useFlowStore(
-    useShallow((state) => state.currentFlow?.locked),
-  );
+  const currentFlow = useFlowStore((state) => state.currentFlow);
   const setCurrentFlow = useFlowStore((state) => state.setCurrentFlow);
   const autoSaving = useFlowsManagerStore((state) => state.autoSaving);
 
   useEffect(() => {
+    const isLocked = currentFlow?.locked;
     store.setState({
       nodesDraggable: !isLocked,
       nodesConnectable: !isLocked,
       elementsSelectable: !isLocked,
     });
-  }, [isLocked]);
+  }, [currentFlow?.locked]);
 
-  const handleSaveFlow = useCallback(() => {
-    const currentFlow = useFlowStore.getState().currentFlow;
+  const handleSaveFlow = () => {
     if (!currentFlow) return;
     const newFlow = cloneDeep(currentFlow);
     newFlow.locked = isInteractive;
@@ -95,16 +92,16 @@ const CanvasControls = ({ children }) => {
     } else {
       setCurrentFlow(newFlow);
     }
-  }, [isInteractive, autoSaving, saveFlow, setCurrentFlow]);
+  };
 
-  const onToggleInteractivity = useCallback(() => {
+  const onToggleInteractivity = () => {
     store.setState({
       nodesDraggable: !isInteractive,
       nodesConnectable: !isInteractive,
       elementsSelectable: !isInteractive,
     });
     handleSaveFlow();
-  }, [isInteractive, store, handleSaveFlow]);
+  };
 
   return (
     <Panel

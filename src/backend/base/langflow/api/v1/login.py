@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
-from fastapi.security import OAuth2PasswordRequestForm
+# from fastapi.security import OAuth2PasswordRequestForm
 
 from langflow.api.utils import DbSession
 from langflow.api.v1.schemas import Token
@@ -20,61 +20,61 @@ from langflow.services.deps import get_settings_service, get_variable_service
 router = APIRouter(tags=["Login"])
 
 
-@router.post("/login", response_model=Token)
-async def login_to_get_access_token(
-    response: Response,
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-    db: DbSession,
-):
-    auth_settings = get_settings_service().auth_settings
-    try:
-        user = await authenticate_user(form_data.username, form_data.password, db)
-    except Exception as exc:
-        if isinstance(exc, HTTPException):
-            raise
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=str(exc),
-        ) from exc
+# @router.post("/login", response_model=Token)
+# async def login_to_get_access_token(
+#     response: Response,
+#     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+#     db: DbSession,
+# ):
+#     auth_settings = get_settings_service().auth_settings
+#     try:
+#         user = await authenticate_user(form_data.username, form_data.password, db)
+#     except Exception as exc:
+#         if isinstance(exc, HTTPException):
+#             raise
+#         raise HTTPException(
+#             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+#             detail=str(exc),
+#         ) from exc
 
-    if user:
-        tokens = await create_user_tokens(user_id=user.id, db=db, update_last_login=True)
-        response.set_cookie(
-            "refresh_token_lf",
-            tokens["refresh_token"],
-            httponly=auth_settings.REFRESH_HTTPONLY,
-            samesite=auth_settings.REFRESH_SAME_SITE,
-            secure=auth_settings.REFRESH_SECURE,
-            expires=auth_settings.REFRESH_TOKEN_EXPIRE_SECONDS,
-            domain=auth_settings.COOKIE_DOMAIN,
-        )
-        response.set_cookie(
-            "access_token_lf",
-            tokens["access_token"],
-            httponly=auth_settings.ACCESS_HTTPONLY,
-            samesite=auth_settings.ACCESS_SAME_SITE,
-            secure=auth_settings.ACCESS_SECURE,
-            expires=auth_settings.ACCESS_TOKEN_EXPIRE_SECONDS,
-            domain=auth_settings.COOKIE_DOMAIN,
-        )
-        response.set_cookie(
-            "apikey_tkn_lflw",
-            str(user.store_api_key),
-            httponly=auth_settings.ACCESS_HTTPONLY,
-            samesite=auth_settings.ACCESS_SAME_SITE,
-            secure=auth_settings.ACCESS_SECURE,
-            expires=None,  # Set to None to make it a session cookie
-            domain=auth_settings.COOKIE_DOMAIN,
-        )
-        await get_variable_service().initialize_user_variables(user.id, db)
-        # Create default project for user if it doesn't exist
-        _ = await get_or_create_default_folder(db, user.id)
-        return tokens
-    raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Incorrect username or password",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
+#     if user:
+#         tokens = await create_user_tokens(user_id=user.id, db=db, update_last_login=True)
+#         response.set_cookie(
+#             "refresh_token_lf",
+#             tokens["refresh_token"],
+#             httponly=auth_settings.REFRESH_HTTPONLY,
+#             samesite=auth_settings.REFRESH_SAME_SITE,
+#             secure=auth_settings.REFRESH_SECURE,
+#             expires=auth_settings.REFRESH_TOKEN_EXPIRE_SECONDS,
+#             domain=auth_settings.COOKIE_DOMAIN,
+#         )
+#         response.set_cookie(
+#             "access_token_lf",
+#             tokens["access_token"],
+#             httponly=auth_settings.ACCESS_HTTPONLY,
+#             samesite=auth_settings.ACCESS_SAME_SITE,
+#             secure=auth_settings.ACCESS_SECURE,
+#             expires=auth_settings.ACCESS_TOKEN_EXPIRE_SECONDS,
+#             domain=auth_settings.COOKIE_DOMAIN,
+#         )
+#         response.set_cookie(
+#             "apikey_tkn_lflw",
+#             str(user.store_api_key),
+#             httponly=auth_settings.ACCESS_HTTPONLY,
+#             samesite=auth_settings.ACCESS_SAME_SITE,
+#             secure=auth_settings.ACCESS_SECURE,
+#             expires=None,  # Set to None to make it a session cookie
+#             domain=auth_settings.COOKIE_DOMAIN,
+#         )
+#         await get_variable_service().initialize_user_variables(user.id, db)
+#         # Create default project for user if it doesn't exist
+#         _ = await get_or_create_default_folder(db, user.id)
+#         return tokens
+#     raise HTTPException(
+#         status_code=status.HTTP_401_UNAUTHORIZED,
+#         detail="Incorrect username or password",
+#         headers={"WWW-Authenticate": "Bearer"},
+#     )
 
 
 @router.get("/auto_login")
@@ -120,47 +120,47 @@ async def auto_login(response: Response, db: DbSession):
     )
 
 
-@router.post("/refresh")
-async def refresh_token(
-    request: Request,
-    response: Response,
-    db: DbSession,
-):
-    auth_settings = get_settings_service().auth_settings
+# @router.post("/refresh")
+# async def refresh_token(
+#     request: Request,
+#     response: Response,
+#     db: DbSession, 
+# ):
+#     auth_settings = get_settings_service().auth_settings
 
-    token = request.cookies.get("refresh_token_lf")
+#     token = request.cookies.get("refresh_token_lf")
 
-    if token:
-        tokens = await create_refresh_token(token, db)
-        response.set_cookie(
-            "refresh_token_lf",
-            tokens["refresh_token"],
-            httponly=auth_settings.REFRESH_HTTPONLY,
-            samesite=auth_settings.REFRESH_SAME_SITE,
-            secure=auth_settings.REFRESH_SECURE,
-            expires=auth_settings.REFRESH_TOKEN_EXPIRE_SECONDS,
-            domain=auth_settings.COOKIE_DOMAIN,
-        )
-        response.set_cookie(
-            "access_token_lf",
-            tokens["access_token"],
-            httponly=auth_settings.ACCESS_HTTPONLY,
-            samesite=auth_settings.ACCESS_SAME_SITE,
-            secure=auth_settings.ACCESS_SECURE,
-            expires=auth_settings.ACCESS_TOKEN_EXPIRE_SECONDS,
-            domain=auth_settings.COOKIE_DOMAIN,
-        )
-        return tokens
-    raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Invalid refresh token",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
+#     if token:
+#         tokens = await create_refresh_token(token, db)
+#         response.set_cookie(
+#             "refresh_token_lf",
+#             tokens["refresh_token"],
+#             httponly=auth_settings.REFRESH_HTTPONLY,
+#             samesite=auth_settings.REFRESH_SAME_SITE,
+#             secure=auth_settings.REFRESH_SECURE,
+#             expires=auth_settings.REFRESH_TOKEN_EXPIRE_SECONDS,
+#             domain=auth_settings.COOKIE_DOMAIN,
+#         )
+#         response.set_cookie(
+#             "access_token_lf",
+#             tokens["access_token"],
+#             httponly=auth_settings.ACCESS_HTTPONLY,
+#             samesite=auth_settings.ACCESS_SAME_SITE,
+#             secure=auth_settings.ACCESS_SECURE,
+#             expires=auth_settings.ACCESS_TOKEN_EXPIRE_SECONDS,
+#             domain=auth_settings.COOKIE_DOMAIN,
+#         )
+#         return tokens
+#     raise HTTPException(
+#         status_code=status.HTTP_401_UNAUTHORIZED,
+#         detail="Invalid refresh token",
+#         headers={"WWW-Authenticate": "Bearer"},
+#     )
 
 
-@router.post("/logout")
-async def logout(response: Response):
-    response.delete_cookie("refresh_token_lf")
-    response.delete_cookie("access_token_lf")
-    response.delete_cookie("apikey_tkn_lflw")
-    return {"message": "Logout successful"}
+# @router.post("/logout")
+# async def logout(response: Response):
+#     response.delete_cookie("refresh_token_lf")
+#     response.delete_cookie("access_token_lf")
+#     response.delete_cookie("apikey_tkn_lflw")
+#     return {"message": "Logout successful"}

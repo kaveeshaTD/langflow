@@ -38,10 +38,12 @@ const useUploadFile = ({
       for (const file of filesToUpload) {
         validateFileSize(file);
         // Check if file extension is allowed
-        const fileExtension = file.name.split(".").pop()?.toLowerCase();
-        if (!fileExtension || (types && !types.includes(fileExtension))) {
+        const fileExtension = file.type
+          ? file.name.split(".").pop()?.toLowerCase()
+          : null;
+        if (types && (!fileExtension || !types.includes(fileExtension))) {
           throw new Error(
-            `File type ${fileExtension} not allowed. Allowed types: ${types?.join(", ")}`,
+            `File type not allowed. Allowed types: ${types.join(", ")}`,
           );
         }
         if (!fileExtension) {

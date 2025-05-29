@@ -1,5 +1,10 @@
 import { useTypesStore } from "@/stores/typesStore";
-import { iconExists, nodeColors } from "@/utils/styleUtils";
+import {
+  BG_NOISE,
+  iconExists,
+  nodeColors,
+  toolModeGradient,
+} from "@/utils/styleUtils";
 import emojiRegex from "emoji-regex";
 import { useEffect, useState } from "react";
 
@@ -13,11 +18,13 @@ export function NodeIcon({
   dataType,
   showNode,
   isGroup,
+  hasToolMode,
 }: {
   icon?: string;
   dataType: string;
   showNode: boolean;
   isGroup?: boolean;
+  hasToolMode: boolean;
 }) {
   const types = useTypesStore((state) => state.types);
   const [name, setName] = useState(types[dataType]);
@@ -39,6 +46,8 @@ export function NodeIcon({
     isLucideIcon ? "lucide-icon" : "integration-icon",
   );
 
+  const bgToolMode = BG_NOISE + "," + toolModeGradient;
+
   const renderIcon = () => {
     if (icon && isEmoji) {
       return <span className="text-lg">{icon}</span>;
@@ -48,10 +57,13 @@ export function NodeIcon({
       return (
         <div
           className={cn(
-            "text-foreground",
+            hasToolMode ? "text-white" : "text-foreground",
             !showNode && "flex min-h-8 min-w-8 items-center justify-center",
             "bg-lucide-icon",
           )}
+          style={{
+            backgroundImage: hasToolMode ? bgToolMode : "",
+          }}
         >
           <IconComponent
             strokeWidth={ICON_STROKE_WIDTH}

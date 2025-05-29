@@ -7,7 +7,6 @@ import { FlowSettingsPropsType } from "@/types/components";
 import { convertUTCToLocalTimezone } from "@/utils/utils";
 import { ColDef, ColGroupDef } from "ag-grid-community";
 import { useCallback, useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
 import BaseModal from "../baseModal";
 
 export default function FlowLogsModal({
@@ -20,11 +19,9 @@ export default function FlowLogsModal({
   const [pageSize, setPageSize] = useState(20);
   const [columns, setColumns] = useState<Array<ColDef | ColGroupDef>>([]);
   const [rows, setRows] = useState<any>([]);
-  const [searchParams] = useSearchParams();
-  const flowIdFromUrl = searchParams.get("id");
 
   const { data, isLoading, refetch } = useGetTransactionsQuery({
-    id: currentFlowId ?? flowIdFromUrl,
+    id: currentFlowId,
     params: {
       page: pageIndex,
       size: pageSize,

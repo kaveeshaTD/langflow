@@ -9,16 +9,23 @@ import useAuthStore from "@/stores/authStore";
 import { useEffect } from "react";
 
 export const ProtectedRoute = ({ children }) => {
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  // const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const isAuthenticated = true;
   const { mutate: mutateRefresh } = useRefreshAccessToken();
   const autoLogin = useAuthStore((state) => state.autoLogin);
   const isAutoLoginEnv = IS_AUTO_LOGIN;
   const testMockAutoLogin = sessionStorage.getItem("testMockAutoLogin");
+  console.log(" isAuthenticated is kt ", isAuthenticated);
+  console.log(" autoLogin is ", autoLogin);
+  console.log(" testMockAutoLogin is ", testMockAutoLogin);
 
+  // test auth flow starting point
   const shouldRedirect =
     !isAuthenticated &&
     autoLogin !== undefined &&
     (!autoLogin || !isAutoLoginEnv);
+
+  // const shouldRedirect =  false;
 
   useEffect(() => {
     const envRefreshTime = LANGFLOW_ACCESS_TOKEN_EXPIRE_SECONDS_ENV;

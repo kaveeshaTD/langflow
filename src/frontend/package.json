@@ -1,6 +1,6 @@
 {
   "name": "langflow",
-  "version": "1.4.2",
+  "version": "1.4.0",
   "private": true,
   "dependencies": {
     "@chakra-ui/number-input": "^2.1.2",
@@ -22,7 +22,6 @@
     "@radix-ui/react-switch": "^1.0.3",
     "@radix-ui/react-tabs": "^1.0.4",
     "@radix-ui/react-tooltip": "^1.0.7",
-    "@smakss/react-scroll-direction": "^4.2.0",
     "@tabler/icons-react": "^3.6.0",
     "@tailwindcss/forms": "^0.5.7",
     "@tailwindcss/line-clamp": "^0.4.4",
@@ -30,7 +29,7 @@
     "@types/axios": "^0.14.0",
     "@types/react-syntax-highlighter": "^15.5.13",
     "@xyflow/react": "^12.3.6",
-    "ace-builds": "^1.41.0",
+    "ace-builds": "^1.35.0",
     "ag-grid-community": "^32.0.2",
     "ag-grid-react": "^32.0.2",
     "ansi-to-html": "^0.7.2",
@@ -48,6 +47,7 @@
     "file-saver": "^2.0.5",
     "framer-motion": "^11.2.10",
     "fuse.js": "^7.0.0",
+    "keycloak-js": "^26.2.0",
     "lodash": "^4.17.21",
     "lucide-react": "^0.503.0",
     "million": "^3.1.11",
@@ -91,6 +91,7 @@
     "zustand": "^4.5.2"
   },
   "scripts": {
+    "dev": "vite",
     "dev:docker": "vite --host 0.0.0.0",
     "start": "vite",
     "build": "vite build",

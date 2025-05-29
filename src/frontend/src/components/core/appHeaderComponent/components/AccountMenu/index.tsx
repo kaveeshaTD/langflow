@@ -7,7 +7,6 @@ import {
   TWITTER_URL,
 } from "@/constants/constants";
 import { useLogout } from "@/controllers/API/queries/auth";
-import { CustomProfileIcon } from "@/customization/components/custom-profile-icon";
 import { ENABLE_DATASTAX_LANGFLOW } from "@/customization/feature-flags";
 import { useCustomNavigate } from "@/customization/hooks/use-custom-navigate";
 import useAuthStore from "@/stores/authStore";
@@ -24,6 +23,9 @@ import {
 } from "../HeaderMenu";
 import { ProfileIcon } from "../ProfileIcon";
 import ThemeButtons from "../ThemeButtons";
+import KeycloakContext  from "../../../../../keycloak/KeycloakProvider"; // Adjust the path to your keycloak instance
+import { useContext } from "react";
+
 
 export const AccountMenu = () => {
   const { customParam: id } = useParams();
@@ -31,14 +33,21 @@ export const AccountMenu = () => {
   const latestVersion = useDarkStore((state) => state.latestVersion);
   const navigate = useCustomNavigate();
   const { mutate: mutationLogout } = useLogout();
+  const { logout } = useContext(KeycloakContext);
 
   const { isAdmin, autoLogin } = useAuthStore((state) => ({
     isAdmin: state.isAdmin,
     autoLogin: state.autoLogin,
   }));
 
+  // const handleLogout = () => {
+  //   mutationLogout();
+  // };
+
   const handleLogout = () => {
-    mutationLogout();
+    console.log("log out called");
+    
+    logout();
   };
 
   const isLatestVersion = version === latestVersion;
@@ -51,7 +60,7 @@ export const AccountMenu = () => {
             className="h-6 w-6 rounded-lg focus-visible:outline-0"
             data-testid="user-profile-settings"
           >
-            <CustomProfileIcon />
+            <ProfileIcon />
           </div>
         </HeaderMenuToggle>
         <HeaderMenuItems position="right" classNameSize="w-[272px]">

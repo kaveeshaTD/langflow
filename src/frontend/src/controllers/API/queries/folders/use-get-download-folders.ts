@@ -1,9 +1,9 @@
-import { customGetDownloadTypeFolders } from "@/customization/utils/custom-get-download-folders";
 import { useMutationFunctionType } from "@/types/api";
 import { UseMutationResult } from "@tanstack/react-query";
 import { api } from "../../api";
 import { getURL } from "../../helpers/constants";
 import { UseRequestProcessor } from "../../services/request-processor";
+
 interface IGetDownloadFolders {
   folderId: string;
 }
@@ -19,7 +19,12 @@ export const useGetDownloadFolders: useMutationFunctionType<
   ): Promise<any> => {
     const response = await api.get<any>(
       `${getURL("PROJECTS")}/download/${payload.folderId}`,
-      customGetDownloadTypeFolders(),
+      {
+        responseType: "blob",
+        headers: {
+          Accept: "application/x-zip-compressed",
+        },
+      },
     );
     return response;
   };

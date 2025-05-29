@@ -8,7 +8,6 @@ import {
 } from "@/controllers/API/queries/messages";
 import { ENABLE_PUBLISH } from "@/customization/feature-flags";
 import { track } from "@/customization/utils/analytics";
-import { customOpenNewTab } from "@/customization/utils/custom-open-new-tab";
 import { LangflowButtonRedirectTarget } from "@/customization/utils/urls";
 import { useUtilityStore } from "@/stores/utilityStore";
 import { swatchColors } from "@/utils/styleUtils";
@@ -260,7 +259,7 @@ export default function IOModal({
 
   const LangflowButtonClick = () => {
     track("LangflowButtonClick");
-    customOpenNewTab(LangflowButtonRedirectTarget());
+    window.open(LangflowButtonRedirectTarget(), "_blank");
   };
 
   useEffect(() => {

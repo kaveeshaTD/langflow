@@ -40,6 +40,8 @@ export const useGetAutoLogin: useQueryFunctionType<undefined, undefined> = (
     try {
       const response = await api.get<Users>(`${getURL("AUTOLOGIN")}`);
       const user = response.data;
+  console.log("state data is 1 ", user);
+  
       if (user && user["access_token"]) {
         user["refresh_token"] = "auto";
         login(user["access_token"], "auto");

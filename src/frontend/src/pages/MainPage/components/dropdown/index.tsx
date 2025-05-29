@@ -2,40 +2,41 @@ import ForwardedIconComponent from "@/components/common/genericIconComponent";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import useAlertStore from "@/stores/alertStore";
 import { FlowType } from "@/types/flow";
-import useDuplicateFlow from "../../hooks/use-handle-duplicate";
+import { downloadFlow } from "@/utils/reactflowUtils";
+import useDuplicateFlows from "../../hooks/use-handle-duplicate";
 import useSelectOptionsChange from "../../hooks/use-select-options-change";
 
 type DropdownComponentProps = {
   flowData: FlowType;
   setOpenDelete: (open: boolean) => void;
-  handleExport: () => void;
+  handlePlaygroundClick?: () => void;
   handleEdit: () => void;
 };
 
 const DropdownComponent = ({
   flowData,
   setOpenDelete,
-  handleExport,
   handleEdit,
 }: DropdownComponentProps) => {
   const setSuccessData = useAlertStore((state) => state.setSuccessData);
   const setErrorData = useAlertStore((state) => state.setErrorData);
-  const { handleDuplicate } = useDuplicateFlow({ flow: flowData });
 
-  const duplicateFlow = () => {
-    handleDuplicate().then(() =>
-      setSuccessData({
-        title: `${flowData.is_component ? "Component" : "Flow"} duplicated successfully`,
-      }),
-    );
+  const { handleDuplicate } = useDuplicateFlows({
+    selectedFlowsComponentsCards: [flowData.id],
+    allFlows: [flowData],
+    setSuccessData,
+  });
+
+  const handleExport = () => {
+    downloadFlow(flowData, flowData.name, flowData.description);
+    setSuccessData({ title: `${flowData.name} exported successfully` });
   };
-
   const { handleSelectOptionsChange } = useSelectOptionsChange(
     [flowData.id],
     setErrorData,
     setOpenDelete,
+    handleDuplicate,
     handleExport,
-    duplicateFlow,
     handleEdit,
   );
 
@@ -69,7 +70,7 @@ const DropdownComponent = ({
           aria-hidden="true"
           className="mr-2 h-4 w-4"
         />
-        Export
+        Download
       </DropdownMenuItem>
       <DropdownMenuItem
         onClick={(e) => {

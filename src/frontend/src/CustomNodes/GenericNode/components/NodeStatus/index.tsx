@@ -6,7 +6,6 @@ import { BuildStatus, EventDeliveryType } from "@/constants/enums";
 import { useGetConfig } from "@/controllers/API/queries/config/use-get-config";
 import { usePostTemplateValue } from "@/controllers/API/queries/nodes/use-post-template-value";
 import { track } from "@/customization/utils/analytics";
-import { customOpenNewTab } from "@/customization/utils/custom-open-new-tab";
 import { getSpecificClassFromBuildStatus } from "@/CustomNodes/helpers/get-class-from-build-status";
 import { mutateTemplate } from "@/CustomNodes/helpers/mutate-template";
 import useIconStatus from "@/CustomNodes/hooks/use-icons-status";
@@ -27,6 +26,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import IconComponent from "../../../../components/common/genericIconComponent";
 import BuildStatusDisplay from "./components/build-status-display";
 import { normalizeTimeString } from "./utils/format-run-time";
+
 const POLLING_TIMEOUT = 21000;
 const POLLING_INTERVAL = 3000;
 
@@ -39,11 +39,10 @@ export default function NodeStatus({
   showNode,
   data,
   buildStatus,
-  dismissAll,
   isOutdated,
   isUserEdited,
-  isBreakingChange,
   getValidationStatus,
+  handleUpdateComponent,
 }: {
   nodeId: string;
   display_name: string;
@@ -53,11 +52,10 @@ export default function NodeStatus({
   showNode: boolean;
   data: NodeDataType;
   buildStatus: BuildStatus;
-  dismissAll: boolean;
   isOutdated: boolean;
   isUserEdited: boolean;
-  isBreakingChange: boolean;
   getValidationStatus: (data) => VertexBuildTypeAPI | null;
+  handleUpdateComponent: () => void;
 }) {
   const nodeId_ = data.node?.flow?.data
     ? (findLastNode(data.node?.flow.data!)?.id ?? nodeId)
@@ -100,7 +98,7 @@ export default function NodeStatus({
 
   // Start polling when connection is initiated
   const startPolling = () => {
-    customOpenNewTab(connectionLink);
+    window.open(connectionLink, "_blank");
     stopPolling();
 
     setIsPolling(true);
@@ -184,6 +182,8 @@ export default function NodeStatus({
     getValidationStatus,
   );
 
+  const dismissAll = useUtilityStore((state) => state.dismissAll);
+
   const getBaseBorderClass = (selected) => {
     let className =
       selected && !isBuilding
@@ -191,8 +191,8 @@ export default function NodeStatus({
         : "border ring-[0.5px] hover:shadow-node ring-border";
     let frozenClass = selected ? "border-ring-frozen" : "border-frozen";
     let updateClass =
-      isOutdated && !isUserEdited && !dismissAll && isBreakingChange
-        ? "border-warning"
+      isOutdated && !isUserEdited && !dismissAll
+        ? "border-warning ring-2 ring-warning"
         : "";
     return cn(frozen ? frozenClass : className, updateClass);
   };
@@ -464,6 +464,36 @@ export default function NodeStatus({
             )}
           </div>
         </ShadTooltip>
+        {dismissAll && isOutdated && !isUserEdited && (
+          <ShadTooltip content="Update component">
+            <div
+              className="button-run-bg hit-area-icon ml-1 bg-warning hover:bg-warning/80"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleUpdateComponent();
+                e.stopPropagation();
+              }}
+            >
+              {showNode && (
+                <Button
+                  unstyled
+                  type="button"
+                  onClick={(e) => e.preventDefault()}
+                >
+                  <div
+                    data-testid={`button_update_` + display_name.toLowerCase()}
+                  >
+                    <IconComponent
+                      name={"AlertTriangle"}
+                      strokeWidth={ICON_STROKE_WIDTH}
+                      className="icon-size text-black"
+                    />
+                  </div>
+                </Button>
+              )}
+            </div>
+          </ShadTooltip>
+        )}
       </div>
     </>
   ) : (

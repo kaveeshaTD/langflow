@@ -1,4 +1,3 @@
-import { customGetHostProtocol } from "@/customization/utils/custom-get-host-protocol";
 import { GetCodeType } from "@/types/tweaks";
 
 /**
@@ -124,7 +123,6 @@ export function getNewPythonApiCode({
   output_type,
   tweaksObject,
   activeTweaks,
-  endpointName,
 }: {
   flowId: string;
   isAuthenticated: boolean;
@@ -133,10 +131,10 @@ export function getNewPythonApiCode({
   output_type: string;
   tweaksObject: any;
   activeTweaks: boolean;
-  endpointName: string;
 }): string {
-  const { protocol, host } = customGetHostProtocol();
-  const apiUrl = `${protocol}//${host}/api/v1/run/${endpointName || flowId}`;
+  const host = window.location.host;
+  const protocol = window.location.protocol;
+  const apiUrl = `${protocol}//${host}/api/v1/run/${flowId}`;
 
   const tweaksString =
     tweaksObject && activeTweaks

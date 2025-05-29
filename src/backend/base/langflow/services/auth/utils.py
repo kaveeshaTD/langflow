@@ -152,6 +152,8 @@ async def get_current_user(
         detail="Invalid or missing API key",
     )
 
+import json
+import requests
 
 async def get_current_user_by_jwt(
     token: str,
@@ -175,9 +177,18 @@ async def get_current_user_by_jwt(
     try:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            payload = jwt.decode(token, secret_key, algorithms=[settings_service.auth_settings.ALGORITHM])
+            header = jwt.get_unverified_header(token)
+            jwks = requests.get(
+                f"http://localhost:8180/auth/realms/cossmos/protocol/openid-connect/certs"
+            ).json()
+            key = next((k for k in jwks["keys"] if k["kid"] == header["kid"]), None)
+            print("key create in token validate function called")
+            if not key:
+                raise Exception("Public key not found.")
+            payload = jwt.decode(token, key, audience="account", issuer="http://localhost:8180/auth/realms/cossmos", algorithms=[settings_service.auth_settings.ALGORITHM])
+            print("decode token paylod is - ",payload)
         user_id: UUID = payload.get("sub")  # type: ignore[assignment]
-        token_type: str = payload.get("type")  # type: ignore[assignment]
+        token_type: str = payload.get("typ")  # type: ignore[assignment]
         if expires := payload.get("exp", None):
             expires_datetime = datetime.fromtimestamp(expires, timezone.utc)
             if datetime.now(timezone.utc) > expires_datetime:
@@ -202,8 +213,12 @@ async def get_current_user_by_jwt(
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         ) from e
+    
+# comment for testing ===================================
+    # user = await get_user_by_id(db, user_id) 
+    user = await get_user_by_id(db, user_id, payload)
 
-    user = await get_user_by_id(db, user_id)
+    print("incomming user is -" , user)
     if user is None or not user.is_active:
         logger.info("User not found or inactive.")
         raise HTTPException(

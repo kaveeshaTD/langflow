@@ -3,7 +3,7 @@ import { awaitBootstrapTest } from "../../utils/await-bootstrap-test";
 
 test(
   "flow state should be properly cleaned up between user sessions",
-  { tag: ["@release", "@api", "@database"] },
+  { tag: ["@bug-fix", "@api", "@database"] },
   async ({ page }) => {
     // Disable auto login
     await page.route("**/api/v1/auto_login", (route) => {
@@ -89,9 +89,10 @@ test(
     // Check that User A starts with an empty flows list
     expect(
       (
-        await page.waitForSelector("text=Welcome to LangFlow", {
-          timeout: 30000,
-        })
+        await page.waitForSelector(
+          "text=Begin with a template, or start from scratch.",
+          { timeout: 30000 },
+        )
       ).isVisible(),
     );
 

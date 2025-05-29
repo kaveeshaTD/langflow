@@ -1,6 +1,5 @@
 import SideBarButtonsComponent from "@/components/core/sidebarComponent";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { CustomStoreSidebar } from "@/customization/components/custom-store-sidebar";
 import {
   ENABLE_DATASTAX_LANGFLOW,
   ENABLE_PROFILE_ICONS,
@@ -10,6 +9,7 @@ import { useStoreStore } from "@/stores/storeStore";
 import { Outlet } from "react-router-dom";
 import ForwardedIconComponent from "../../components/common/genericIconComponent";
 import PageLayout from "../../components/common/pageLayout";
+
 export default function SettingsPage(): JSX.Element {
   const autoLogin = useAuthStore((state) => state.autoLogin);
   const hasStore = useStoreStore((state) => state.hasStore);
@@ -71,7 +71,28 @@ export default function SettingsPage(): JSX.Element {
   );
 
   if (!ENABLE_DATASTAX_LANGFLOW) {
-    const langflowItems = CustomStoreSidebar();
+    const langflowItems = [
+      {
+        title: "Langflow API Keys",
+        href: "/settings/api-keys",
+        icon: (
+          <ForwardedIconComponent
+            name="Key"
+            className="w-4 flex-shrink-0 justify-start stroke-[1.5]"
+          />
+        ),
+      },
+      {
+        title: "Langflow Store",
+        href: "/settings/store",
+        icon: (
+          <ForwardedIconComponent
+            name="Store"
+            className="w-4 flex-shrink-0 justify-start stroke-[1.5]"
+          />
+        ),
+      },
+    ];
 
     sidebarNavItems.splice(2, 0, ...langflowItems);
   }

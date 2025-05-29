@@ -16,8 +16,6 @@ import {
   getRightHandleId,
 } from "@/CustomNodes/utils/get-handle-id";
 import { INCOMPLETE_LOOP_ERROR_ALERT } from "@/constants/alerts_constants";
-import { customDownloadFlow } from "@/customization/utils/custom-reactFlowUtils";
-import useFlowStore from "@/stores/flowStore";
 import {
   Connection,
   Edge,
@@ -96,7 +94,6 @@ export function cleanEdges(nodes: AllNodeType[], edges: EdgeType[]) {
       const templateFieldType = targetNode.data.node!.template[field]?.type;
       const inputTypes = targetNode.data.node!.template[field]?.input_types;
       const hasProxy = targetNode.data.node!.template[field]?.proxy;
-      const isToolMode = targetNode.data.node!.template[field]?.tool_mode;
 
       if (
         !field &&
@@ -126,10 +123,7 @@ export function cleanEdges(nodes: AllNodeType[], edges: EdgeType[]) {
           id.proxy = targetNode.data.node!.template[field]?.proxy;
         }
       }
-      if (
-        scapedJSONStringfy(id) !== targetHandle ||
-        (targetNode.data.node?.tool_mode && isToolMode)
-      ) {
+      if (scapedJSONStringfy(id) !== targetHandle) {
         newEdges = newEdges.filter((e) => e.id !== edge.id);
       }
     }
@@ -321,16 +315,12 @@ export function unselectAllNodesEdges(nodes: Node[], edges: Edge[]) {
 
 export function isValidConnection(
   { source, target, sourceHandle, targetHandle }: Connection,
-  nodes?: AllNodeType[],
-  edges?: EdgeType[],
+  nodes: AllNodeType[],
+  edges: EdgeType[],
 ): boolean {
   if (source === target) {
     return false;
   }
-
-  const nodesArray = nodes || useFlowStore.getState().nodes;
-  const edgesArray = edges || useFlowStore.getState().edges;
-
   const targetHandleObject: targetHandleType = scapeJSONParse(targetHandle!);
   const sourceHandleObject: sourceHandleType = scapeJSONParse(sourceHandle!);
   if (
@@ -350,20 +340,20 @@ export function isValidConnection(
         t === targetHandleObject.type,
     )
   ) {
-    let targetNode = nodesArray.find((node) => node.id === target!)?.data?.node;
+    let targetNode = nodes.find((node) => node.id === target!)?.data?.node;
     if (!targetNode) {
-      if (!edgesArray.find((e) => e.targetHandle === targetHandle)) {
+      if (!edges.find((e) => e.targetHandle === targetHandle)) {
         return true;
       }
     } else if (
       targetHandleObject.output_types &&
-      !edgesArray.find((e) => e.targetHandle === targetHandle)
+      !edges.find((e) => e.targetHandle === targetHandle)
     ) {
       return true;
     } else if (
       !targetHandleObject.output_types &&
       ((!targetNode.template[targetHandleObject.fieldName].list &&
-        !edgesArray.find((e) => e.targetHandle === targetHandle)) ||
+        !edges.find((e) => e.targetHandle === targetHandle)) ||
         targetNode.template[targetHandleObject.fieldName].list)
     ) {
       return true;
@@ -1481,6 +1471,8 @@ export function expandGroupNode(
   id: string,
   flow: FlowType,
   template: APITemplateType,
+  nodes: AllNodeType[],
+  edges: EdgeType[],
   setNodes: (
     update: AllNodeType[] | ((oldState: AllNodeType[]) => AllNodeType[]),
   ) => void,
@@ -1491,7 +1483,7 @@ export function expandGroupNode(
 ) {
   const idsMap = updateIds(flow!.data!);
   updateProxyIdsOnTemplate(template, idsMap);
-  let flowEdges = useFlowStore.getState().edges;
+  let flowEdges = edges;
   updateEdgesIds(flowEdges, idsMap);
   const gNodes: AllNodeType[] = cloneDeep(flow?.data?.nodes!);
   const gEdges = cloneDeep(flow!.data!.edges);
@@ -1591,12 +1583,9 @@ export function expandGroupNode(
       }
     }
   });
-  const filteredNodes = [
-    ...useFlowStore.getState().nodes.filter((n) => n.id !== id),
-    ...gNodes,
-  ];
+  const filteredNodes = [...nodes.filter((n) => n.id !== id), ...gNodes];
   const filteredEdges = [
-    ...flowEdges.filter((e) => e.target !== id && e.source !== id),
+    ...edges.filter((e) => e.target !== id && e.source !== id),
     ...gEdges,
   ];
   setNodes(filteredNodes);
@@ -1803,7 +1792,7 @@ function sortJsonStructure<T>(obj: T): T {
  * @param flowName - The name to use for the flow
  * @param flowDescription - Optional description for the flow
  */
-export async function downloadFlow(
+export function downloadFlow(
   flow: FlowType,
   flowName: string,
   flowDescription?: string,
@@ -1819,10 +1808,17 @@ export async function downloadFlow(
       description: flowDescription,
     };
 
+    console.log(flowData);
+
     const sortedData = sortJsonStructure(flowData);
     const sortedJsonString = JSON.stringify(sortedData, null, 2);
 
-    customDownloadFlow(flow, sortedJsonString, flowName);
+    const dataUri = `data:text/json;chatset=utf-8,${encodeURIComponent(sortedJsonString)}`;
+    const downloadLink = document.createElement("a");
+    downloadLink.href = dataUri;
+    downloadLink.download = `${flowName || flow.name}.json`;
+
+    downloadLink.click();
   } catch (error) {
     console.error("Error downloading flow:", error);
   }

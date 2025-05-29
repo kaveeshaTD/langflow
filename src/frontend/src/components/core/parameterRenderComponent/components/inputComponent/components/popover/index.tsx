@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/utils/utils";
 import { PopoverAnchor } from "@radix-ui/react-popover";
-import { uniqueId } from "lodash";
 import { X } from "lucide-react";
 import { ReactNode, useMemo, useState } from "react";
 
@@ -270,7 +269,7 @@ const CustomInputPopover = ({
               autoComplete="off"
               onFocus={() => setIsFocused(true)}
               autoFocus={autoFocus}
-              id={id + uniqueId()}
+              id={id}
               ref={refInput}
               type={!pwdVisible && password ? "password" : "text"}
               onBlur={() => {

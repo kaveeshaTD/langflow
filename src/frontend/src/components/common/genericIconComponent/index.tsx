@@ -1,6 +1,6 @@
-import React, { Suspense, forwardRef, memo } from "react";
+import React, { Suspense, forwardRef, lazy, memo } from "react";
 import { IconComponentProps } from "../../../types/components";
-import { getCachedIcon, getNodeIcon } from "../../../utils/styleUtils";
+import { getNodeIcon } from "../../../utils/styleUtils";
 import { cn } from "../../../utils/utils";
 
 import { Skeleton } from "@/components/ui/skeleton";
@@ -23,42 +23,38 @@ export const ForwardedIconComponent = memo(
     ) => {
       const [showFallback, setShowFallback] = useState(false);
       const [iconError, setIconError] = useState(false);
-      const [TargetIcon, setTargetIcon] = useState<any>(getCachedIcon(name));
+      const [initialName, setInitialName] = useState(name);
+      const [TargetIcon, setTargetIcon] = useState<any>(null);
 
       useEffect(() => {
-        setIconError(false);
-        setTargetIcon(null);
-        setShowFallback(false);
+        // Reset states when icon name changes
+        if (!TargetIcon || initialName !== name) {
+          setInitialName(name);
+          setIconError(false);
+          setTargetIcon(null);
 
-        let isMounted = true;
-        let timer: NodeJS.Timeout | null = null;
+          const timer = setTimeout(() => {
+            setShowFallback(true);
+          }, 30);
 
-        if (name && typeof name === "string") {
-          getNodeIcon(name)
-            .then((component) => {
-              if (isMounted) {
+          // Load the icon if we have a name
+          if (name && typeof name === "string") {
+            getNodeIcon(name)
+              .then((component) => {
                 setTargetIcon(component);
                 setShowFallback(false);
-              }
-            })
-            .catch((error) => {
-              if (isMounted) {
+              })
+              .catch((error) => {
                 console.error(`Error loading icon ${name}:`, error);
                 setIconError(true);
                 setShowFallback(false);
-              }
-            });
+              });
+          } else {
+            setShowFallback(false);
+          }
 
-          // Show fallback skeleton if icon takes too long
-          timer = setTimeout(() => {
-            if (isMounted) setShowFallback(true);
-          }, 30);
+          return () => clearTimeout(timer);
         }
-
-        return () => {
-          isMounted = false;
-          if (timer) clearTimeout(timer);
-        };
       }, [name]);
 
       const style = {

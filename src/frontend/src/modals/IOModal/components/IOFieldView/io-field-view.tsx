@@ -1,4 +1,3 @@
-import CustomIOFileInput from "@/customization/components/custom-file-input";
 import useHandleNewValue from "@/CustomNodes/hooks/use-handle-new-value";
 import { AllNodeType } from "@/types/flow";
 import { cloneDeep } from "lodash";
@@ -92,7 +91,7 @@ export default function IOFieldView({
             );
           case IOInputTypes.FILE_LOADER:
             return (
-              <CustomIOFileInput
+              <IOFileInput
                 field={node.data.node!.template["file_path"]["value"]}
                 updateValue={(e) => {
                   if (node) {

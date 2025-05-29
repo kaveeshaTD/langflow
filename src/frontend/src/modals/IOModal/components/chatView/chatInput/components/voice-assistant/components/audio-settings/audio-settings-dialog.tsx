@@ -9,9 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
-import { usePatchGlobalVariables } from "@/controllers/API/queries/variables";
 import { useGetVoiceList } from "@/controllers/API/queries/voice/use-get-voice-list";
-import { useDebounce } from "@/hooks/use-debounce";
 import GeneralDeleteConfirmationModal from "@/shared/components/delete-confirmation-modal";
 import GeneralGlobalVariableModal from "@/shared/components/global-variable-modal";
 import { useGlobalVariablesStore } from "@/stores/globalVariablesStore/globalVariables";
@@ -71,10 +69,6 @@ const SettingsVoiceModal = ({
     (state) => state.globalVariablesEntries,
   );
 
-  const globalVariablesEntities = useGlobalVariablesStore(
-    (state) => state.globalVariablesEntities,
-  );
-
   const openaiVoices = useVoiceStore((state) => state.openaiVoices);
   const [allVoices, setAllVoices] = useState<
     {
@@ -89,7 +83,7 @@ const SettingsVoiceModal = ({
     data: voiceList,
     isFetched,
     refetch,
-  } = useGetVoiceList(elevenLabsApiKey, {
+  } = useGetVoiceList({
     enabled: shouldFetchVoices,
     refetchOnMount: shouldFetchVoices,
     refetchOnWindowFocus: shouldFetchVoices,
@@ -164,8 +158,6 @@ const SettingsVoiceModal = ({
     return globalVariables?.map((variable) => variable).includes(variable);
   };
 
-  const { mutate: updateVariable } = usePatchGlobalVariables();
-
   const handleSetMicrophone = (deviceId: string) => {
     setSelectedMicrophone(deviceId);
     localStorage.setItem("lf_selected_microphone", deviceId);
@@ -234,25 +226,6 @@ const SettingsVoiceModal = ({
 
   const showAddOpenAIKeyButton = !hasOpenAIAPIKey || isEditingOpenAIKey;
   const showAllSettings = hasOpenAIAPIKey && !isEditingOpenAIKey;
-
-  const debouncedSetElevenLabsApiKey = useDebounce((value: string) => {
-    const globalVariable = globalVariablesEntities?.find(
-      (variable) => variable.name === "ELEVENLABS_API_KEY",
-    );
-
-    if (globalVariable) {
-      updateVariable({
-        name: "ELEVENLABS_API_KEY",
-        value: value,
-        id: globalVariable.id,
-      });
-    }
-  }, 2000);
-
-  const handleSetElevenLabsApiKey = (value: string) => {
-    setElevenLabsApiKey(value);
-    debouncedSetElevenLabsApiKey(value);
-  };
 
   return (
     <>
@@ -399,7 +372,9 @@ const SettingsVoiceModal = ({
                           />
                         )}
                         value={elevenLabsApiKey}
-                        onChange={handleSetElevenLabsApiKey}
+                        onChange={(value) => {
+                          setElevenLabsApiKey(value);
+                        }}
                         selectedOption={
                           checkIfGlobalVariableExists(elevenLabsApiKey)
                             ? elevenLabsApiKey

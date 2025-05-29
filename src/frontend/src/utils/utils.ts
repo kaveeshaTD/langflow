@@ -589,7 +589,7 @@ export function FormatColumns(columns: ColumnField[]): ColDef<any>[] {
       ) {
         if (col.options && col.formatter === FormatterType.text) {
           newCol.cellEditor = TableDropdownCellEditor;
-          newCol.cellEditorPopup = true;
+          newCol.cellEditorPopup = false;
           newCol.cellEditorParams = {
             values: col.options,
           };

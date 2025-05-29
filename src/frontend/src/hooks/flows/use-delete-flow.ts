@@ -7,6 +7,7 @@ import {
 } from "@/utils/reactflowUtils";
 
 const useDeleteFlow = () => {
+  const flows = useFlowsManagerStore((state) => state.flows);
   const setFlows = useFlowsManagerStore((state) => state.setFlows);
 
   const { mutate, isPending } = useDeleteDeleteFlows();
@@ -16,7 +17,6 @@ const useDeleteFlow = () => {
   }: {
     id: string | string[];
   }): Promise<void> => {
-    const flows = useFlowsManagerStore.getState().flows;
     return new Promise<void>((resolve, reject) => {
       if (!Array.isArray(id)) {
         id = [id];

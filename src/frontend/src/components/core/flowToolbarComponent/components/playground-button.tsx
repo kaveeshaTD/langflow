@@ -1,8 +1,8 @@
 import ForwardedIconComponent from "@/components/common/genericIconComponent";
 import ShadTooltip from "@/components/common/shadTooltipComponent";
 import { PLAYGROUND_BUTTON_NAME } from "@/constants/constants";
-import { CustomIOModal } from "@/customization/components/custom-new-modal";
 import { ENABLE_PUBLISH } from "@/customization/feature-flags";
+import IOModal from "@/modals/IOModal/new-modal";
 
 interface PlaygroundButtonProps {
   hasIO: boolean;
@@ -50,14 +50,14 @@ const PlaygroundButton = ({
   canvasOpen,
 }: PlaygroundButtonProps) => {
   return hasIO ? (
-    <CustomIOModal
+    <IOModal
       open={open}
       setOpen={setOpen}
       disable={!hasIO}
       canvasOpen={canvasOpen}
     >
       <ActiveButton />
-    </CustomIOModal>
+    </IOModal>
   ) : (
     <ShadTooltip content="Add a Chat Input or Chat Output to use the playground">
       <div>

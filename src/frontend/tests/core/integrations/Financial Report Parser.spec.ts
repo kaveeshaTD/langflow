@@ -59,6 +59,6 @@ withEventDeliveryModes(
       .allTextContents();
     const concatAllText = textContents.join(" ").toLowerCase();
     expect(concatAllText.length).toBeGreaterThan(10);
-    expect(concatAllText).toContain("ebitda");
+    expect(concatAllText).toContain("ebitida");
   },
 );

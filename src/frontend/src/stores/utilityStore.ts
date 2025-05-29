@@ -6,6 +6,8 @@ import { create } from "zustand";
 export const useUtilityStore = create<UtilityStoreType>((set, get) => ({
   clientId: "",
   setClientId: (clientId: string) => set({ clientId }),
+  dismissAll: false,
+  setDismissAll: (dismissAll: boolean) => set({ dismissAll }),
   chatValueStore: "",
   setChatValueStore: (value: string) => set({ chatValueStore: value }),
   selectedItems: [],

@@ -26,7 +26,7 @@ test(
     });
     // click on the delete button
     await page.getByText("Delete").last().click();
-    await page.getByText("This can't be undone.").isVisible({
+    await page.getByText("Note: This action is irreversible.").isVisible({
       timeout: 1000,
     });
 

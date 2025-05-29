@@ -19,7 +19,7 @@ class AuthSettings(BaseSettings):
         description="Secret key for JWT. If not provided, a random one will be generated.",
         frozen=False,
     )
-    ALGORITHM: str = "HS256"
+    ALGORITHM: str = "RS256"
     ACCESS_TOKEN_EXPIRE_SECONDS: int = 60 * 60  # 1 hour
     REFRESH_TOKEN_EXPIRE_SECONDS: int = 60 * 60 * 24 * 7  # 7 days
 

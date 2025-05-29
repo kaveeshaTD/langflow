@@ -33,6 +33,7 @@ export default function LoginPage(): JSX.Element {
   const { mutate } = useLoginUser();
 
   function signIn() {
+    console.log("sign func called");
     const user: LoginType = {
       username: username.trim(),
       password: password.trim(),
@@ -40,9 +41,14 @@ export default function LoginPage(): JSX.Element {
 
     mutate(user, {
       onSuccess: (data) => {
+        console.log("response acccess token  is  2", data.access_token);
+        console.log("response refresh token  is  3", data.refresh_token);
+        console.log("response is login  3", login);
         login(data.access_token, "login", data.refresh_token);
       },
       onError: (error) => {
+        console.log("error is +++++++++ ", error);
+
         setErrorData({
           title: SIGNIN_ERROR_ALERT,
           list: [error["response"]["data"]["detail"]],
@@ -71,7 +77,7 @@ export default function LoginPage(): JSX.Element {
             className="mb-4 h-10 w-10 scale-[1.5]"
           />
           <span className="mb-6 text-2xl font-semibold text-primary">
-            Sign in to Langflow
+            Sign in to Langflow kaveesha
           </span>
           <div className="mb-3 w-full">
             <Form.Field name="username">

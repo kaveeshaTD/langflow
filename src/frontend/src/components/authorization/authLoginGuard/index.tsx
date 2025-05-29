@@ -5,6 +5,9 @@ export const ProtectedLoginRoute = ({ children }) => {
   const autoLogin = useAuthStore((state) => state.autoLogin);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
+  console.log("auto login from protected router", autoLogin);
+  console.log("isAuthenticated from auto login ", isAuthenticated);
+
   if (autoLogin === true || isAuthenticated) {
     const urlParams = new URLSearchParams(window.location.search);
     const redirectPath = urlParams.get("redirect");

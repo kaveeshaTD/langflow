@@ -4,17 +4,21 @@ import { api } from "../../api";
 import { getURL } from "../../helpers/constants";
 import { UseRequestProcessor } from "../../services/request-processor";
 
-export const useGetVoiceList = (elevenlabsApiKey: string, options?: any) => {
+export const useGetVoiceList: useQueryFunctionType<undefined, any> = (
+  options,
+) => {
   const { query } = UseRequestProcessor();
   const setVoices = useVoiceStore((state) => state.setVoices);
   const voices = useVoiceStore((state) => state.voices);
 
-  const getVoiceListFn = async () => {
+  const getVoiceListFn = async (): Promise<
+    {
+      name: string;
+      voice_id: string;
+    }[]
+  > => {
     if (voices.length > 0) {
       return voices;
-    }
-    if (!elevenlabsApiKey) {
-      return [];
     }
 
     const res = await api.get(`${getURL("VOICE")}/elevenlabs/voice_ids`);
@@ -37,7 +41,7 @@ export const useGetVoiceList = (elevenlabsApiKey: string, options?: any) => {
   };
 
   const queryResult = query(
-    ["useGetVoiceList", elevenlabsApiKey],
+    ["useGetVoiceList"],
     getVoiceListFn,
     defaultOptions,
   );
